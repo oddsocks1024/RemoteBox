@@ -1,0 +1,42 @@
+Fixes for building Cairo 1.109 against MSYS2 UCRT64. Applied by setup-deps.sh.
+
+* CairoSurface.xs: on Win64 "unsigned long" is 32 bit while STRLEN is 64 bit.
+  SvPV() writes a STRLEN through the pointer, which GCC 14+ rejects and which
+  would otherwise corrupt the stack.
+* Makefile.PL: register CAIRO_FONT_TYPE_DWRITE (cairo 1.18+), the default font
+  backend on Windows, so font type queries do not fail.
+
+--- a/CairoSurface.xs
++++ b/CairoSurface.xs
+@@ -389,7 +389,7 @@
+ cairo_surface_set_mime_data (cairo_surface_t *surface, const char *mime_type, SV *data);
+     PREINIT:
+ 	const unsigned char *mime_data;
+-	unsigned long length;
++	STRLEN length;
+     CODE:
+ 	SvREFCNT_inc (data);
+ 	mime_data = (const unsigned char *) SvPV(data, length);
+--- a/Makefile.PL
++++ b/Makefile.PL
+@@ -328,6 +328,7 @@
+ my $have_cairo_1_12 = ExtUtils::PkgConfig->atleast_version("cairo", "1.12.0");
+ my $have_cairo_1_14 = ExtUtils::PkgConfig->atleast_version("cairo", "1.14.0");
+ my $have_cairo_1_16 = ExtUtils::PkgConfig->atleast_version("cairo", "1.16.0");
++my $have_cairo_1_18 = ExtUtils::PkgConfig->atleast_version("cairo", "1.18.0");
+ 
+ if ($have_cairo_1_2) {
+ 	add_new_enum_values(
+@@ -522,6 +523,12 @@
+ } else {
+ }
+ 
++if ($have_cairo_1_18) {
++	add_new_enum_values(
++		cairo_font_type_t => [qw/CAIRO_FONT_TYPE_DWRITE/],
++	);
++}
++
+ if ($have_cairo_1_16) {
+ 	add_new_enum_values(
+ 		cairo_status_t => [qw/CAIRO_STATUS_PNG_ERROR

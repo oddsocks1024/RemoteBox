@@ -5,7 +5,11 @@
 use strict;
 use warnings;
 use utf8;
-use Gtk3 -init;
+use Gtk3;
+# On Windows, the setlocale() in gtk_init() also changes the locale Perl uses
+# internally. With a decimal comma locale, numbers then format as "0,5", which
+# breaks Perl's version checks and the values sent to the server.
+BEGIN { Gtk3::disable_setlocale() if ($^O =~ m/MSWin/); Gtk3::init(); }
 use Socket;
 use FindBin qw($Bin);
 use Glib ('TRUE','FALSE');

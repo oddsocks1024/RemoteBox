@@ -3,7 +3,8 @@ use strict;
 use warnings;
 use Glib ('TRUE','FALSE');
 our %gui;
-our %prefs = (RDPCLIENT           => 'xfreerdp /size:%Xx%Y /bpp:32 +clipboard /sound /t:"%n - RemoteBox" /v:%h:%p /d: /p: /cert:ignore',
+our %prefs = (RDPCLIENT           => ($^O =~ m/MSWin/) ? 'mstsc.exe /w:%X /h:%Y /v:%h:%p' # Built into Windows
+                                                       : 'xfreerdp /size:%Xx%Y /bpp:32 +clipboard /sound /t:"%n - RemoteBox" /v:%h:%p /d: /p: /cert:ignore',
               VNCCLIENT           => 'vncviewer -Shared -AcceptClipboard -SetPrimary -SendClipboard -SendPrimary -RemoteResize -DesktopSize %Xx%Y  %h:%p',
               ADDADDITIONS        => 1,
               RDPAUTOOPEN         => 1,

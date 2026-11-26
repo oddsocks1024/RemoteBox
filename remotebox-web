@@ -52,9 +52,24 @@ die "Error: You do not have a supported web browser in your command path" if(!$b
 print("RemoteBox Web\n");
 print("RemoteBox Application URL: $cfg{url}:$cfg{port}\n");
 print("Broadway Daemon: $broadwayd\n");
-system("$broadwayd --port $cfg{port} 1>/dev/null 2>/dev/null &");
-sleep 1;
-print("Detected Browser: $browser\n");
-system("$browser $cfg{url}:$cfg{port} &");
-print("Detected RemoteBox Instance: $remotebox\n\n\n");
-system("GDK_BACKEND=broadway $remotebox");
+if ($^O =~ m/MSWin/) {
+    # Windows has no '&' or /dev/null, but system(1, ...) starts a process without
+    # waiting for it. The remotebox script must be run via perl.
+    my $broadwaypid = system(1, $broadwayd, '--port', $cfg{port});
+    sleep 1;
+    print("Detected Browser: $browser\n");
+    system(1, $browser, "$cfg{url}:$cfg{port}");
+    print("Detected RemoteBox Instance: $remotebox\n\n\n");
+    $ENV{GDK_BACKEND} = 'broadway';
+    system($^X, $remotebox);
+    # Without job control it would otherwise keep running after RemoteBox exits
+    kill('KILL', $broadwaypid) if ($broadwaypid > 0);
+}
+else {
+    system("$broadwayd --port $cfg{port} 1>/dev/null 2>/dev/null &");
+    sleep 1;
+    print("Detected Browser: $browser\n");
+    system("$browser $cfg{url}:$cfg{port} &");
+    print("Detected RemoteBox Instance: $remotebox\n\n\n");
+    system("GDK_BACKEND=broadway $remotebox");
+}

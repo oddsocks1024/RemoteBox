@@ -1,0 +1,4 @@
+# Shell scripts and patches must keep LF endings on Windows checkouts
+*.sh    text eol=lf
+*.patch text eol=lf
+*.cmd   text eol=crlf

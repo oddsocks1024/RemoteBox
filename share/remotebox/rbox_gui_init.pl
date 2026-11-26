@@ -3400,6 +3400,11 @@ sub build_winMain {
     my $miPower = gui_new_menu_item('Instant _Power Off', 'vm_poweroff_16px.png', $menuStop);
     my $miACPI = gui_new_menu_item('_ACPI Shutdown', 'vm_shutdown_16px.png', $menuStop);
     my $miSave = gui_new_menu_item('_Save State', 'vm_save_state_16px.png', $menuStop);
+    # A menu can only be attached to one widget, so the Stop toolbar button needs its own
+    my $menuStopButton = gui_new_menu();
+    my $miPowerButton = gui_new_menu_item('Instant _Power Off', 'vm_poweroff_16px.png', $menuStopButton);
+    my $miACPIButton = gui_new_menu_item('_ACPI Shutdown', 'vm_shutdown_16px.png', $menuStopButton);
+    my $miSaveButton = gui_new_menu_item('_Save State', 'vm_save_state_16px.png', $menuStopButton);
     my $miDevices = gui_new_menu_item('_Devices', undef, $menubar);
     $miDevices->set_submenu($gui{menu}{Devices} = gui_new_menu());
     $gui{mi}{Display} = gui_new_menu_item('Display', 'vrdp_16px.png', $gui{menu}{Devices});
@@ -3474,7 +3479,7 @@ sub build_winMain {
                                                                           label => 'S_top',
                                                                           tip   => "Power off the guest\n* Additional options in the button menu"}), -1);
 
-    $gui{d}{Main}{buttonStop}->set_menu($menuStop);
+    $gui{d}{Main}{buttonStop}->set_menu($menuStopButton);
     $toolbar->insert($gui{d}{Main}{buttonDiscard} = gui_new_toolbutton({image => 'vm_discard_32px.png',
                                                                        label => '_Discard',
                                                                        tip   => "Discard the guest\'s saved state"}), -1);
@@ -3670,6 +3675,9 @@ sub build_winMain {
     $miPower->signal_connect('activate' => \&stop_guest_poweroff);
     $miACPI->signal_connect('activate' => \&stop_guest_acpi);
     $miSave->signal_connect('activate' => \&stop_guest_savestate);
+    $miPowerButton->signal_connect('activate' => \&stop_guest_poweroff);
+    $miACPIButton->signal_connect('activate' => \&stop_guest_acpi);
+    $miSaveButton->signal_connect('activate' => \&stop_guest_savestate);
     $miAbout->signal_connect('activate' => \&show_dialog_about);
     $buttonConnect->signal_connect('clicked' => \&show_dialog_connect);
     $gui{d}{Main}{buttonNew}->signal_connect('clicked' => \&show_dialog_new_guest);
